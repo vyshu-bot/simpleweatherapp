@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather Forecast 🌦️</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background: #f0f8ff;
+            position: relative; /* Ensure absolute positioning of child elements works */
+        }
+
+        .chart-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px; /* Space between charts */
+            margin-top: 30px;
+        }
+
+        canvas {
+            width: 400px !important; /* Make the canvas smaller */
+            height: 400px !important; /* Make the canvas smaller */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            background: white;
+            padding: 20px;
+        }
+
+        /* Style for the Back button (or icon) in the top-right corner */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #007BFF;
+            text-decoration: none;
+        }
+
+        .back-button:hover {
+            color: #0056b3;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- Back Button/Icon in the top-right corner -->
+    <a href="/" class="back-button">🔙 Back</a>
+     
+    <h1 style="font-family: 'Times New Roman', Times, serif;">Current Weather in {{ weather.city }}</h1>
+    <p>Temperature: {{ weather.temp }}°C</p>
+    <p>Condition: {{ weather.condition }}</p>
+    <p>Humidity: {{ weather.humidity }}%</p>
+    <p>Wind: {{ weather.wind }} km/h</p>
+
+    <h2 style="font-family:'Times New Roman', Times, serif">7-Day Forecast</h2>
+
+    <!-- Charts Side by Side -->
+    <div class="chart-container">
+        <!-- Line Chart -->
+        <canvas id="forecastChart"></canvas>
+
+        <!-- Pie Chart -->
+        <canvas id="tempPieChart"></canvas>
+    </div>
+
+    <script>
+    const labels = [
+        {% for day in forecast %}
+            "{{ day.date }}",
+        {% endfor %}
+    ];
+
+    const maxTemps = [
+        {% for day in forecast %}
+            {{ day.day.maxtemp_c }},
+        {% endfor %}
+    ];
+
+    const minTemps = [
+        {% for day in forecast %}
+            {{ day.day.mintemp_c }},
+        {% endfor %}
+    ];
+
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+
+    // Gradient colors
+    const gradientMax = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientMax.addColorStop(0, 'rgba(255, 99, 132, 0.8)');
+    gradientMax.addColorStop(1, 'rgba(255, 99, 132, 0.2)');
+
+    const gradientMin = ctx.createLinearGradient(0, 0, 0, 400);
+    gradientMin.addColorStop(0, 'rgba(54, 162, 235, 0.8)');
+    gradientMin.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
+
+    // Line Chart
+    const forecastChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Max Temp (°C)',
+                    data: maxTemps,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: gradientMax,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: 'white',
+                    pointBorderColor: 'rgba(255, 99, 132, 1)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    borderWidth: 3
+                },
+                {
+                    label: 'Min Temp (°C)',
+                    data: minTemps,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: gradientMin,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: 'white',
+                    pointBorderColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    borderWidth: 3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: '🌦️ 7-Day Temperature Forecast',
+                    font: {
+                        size: 18
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Pie Chart
+    const pieCtx = document.getElementById('tempPieChart').getContext('2d');
+
+    const pieColors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#66BB6A'
+    ];
+
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: maxTemps,
+                backgroundColor: pieColors,
+                borderColor: 'white',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                title: {
+                    display: true,
+                    text: '🌡️ Max Temperature Contribution Per Day',
+                    font: {
+                        size: 18
+                    }
+                }
+            }
+        }
+    });
+
+    </script>
+
+</body>
+</html>

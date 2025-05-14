@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App 🌦️</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            background: #f0f8ff;
+        }
+
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+            background: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            margin-top: 20px;
+            border-radius: 10px;
+        }
+        .box{
+            width: 400px !important; /* Make the canvas smaller */
+            height: 200px !important; /* Make the canvas smaller */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            background: white;
+            padding-left:30px;
+            padding-top: 30px;
+            margin-left: 33%;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌤️ Weather Report</h1>
+    <div class="box">
+    <!-- City Input -->
+    <form method="POST">
+        <input type="text" name="city" placeholder="Enter City or Location"><br><br>
+        <button type="submit">Get Weather</button>
+    </form>
+    <br>
+
+    <!-- Use My Location Button -->
+    <button onclick="getLocation()">📍 Use My Location</button>
+</div>
+    <!-- Google Map -->
+    <div id="map"></div>
+
+    <script>
+    // 1) Auto location button
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                let lat = position.coords.latitude;
+                let lon = position.coords.longitude;
+                window.location.href = `/weather/${lat},${lon}`;
+            });
+        } else {
+            alert("Geolocation not supported.");
+        }
+    }
+
+    // 2) Google Map
+    function initMap() {
+        var defaultLoc = { lat: 20.5937, lng: 78.9629 }; // India center
+        var map = new google.maps.Map(document.getElementById('map'), {
+            zoom: 5,
+            center: defaultLoc
+        });
+
+        // Click to get weather
+        map.addListener('click', function(e) {
+            let lat = e.latLng.lat();
+            let lon = e.latLng.lng();
+            window.location.href = `/weather/${lat},${lon}`;
+        });
+    }
+    </script>
+
+
+
+</body>
+</html>
